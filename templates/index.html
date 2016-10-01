@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+      <title>FreeMote-PC Remote</title>
+      <meta charset="utf-8">      
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <!--<link rel="stylesheet" href="css/font-awesome.min.css">-->
+      <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+      <!--<link rel="stylesheet" href="style.css" />-->
+      <style type="text/css">
+      button{
+        padding: 8px;
+      }
+
+      </style>
+    </head>
+
+    <body>
+    <div class="container-fluid">
+      <div class="container">
+         <canvas id="mousePos" width="300" height="400" style="position:relative;background-color:grey;">
+           
+         </canvas>
+      </div>
+
+      <div class="container">
+        <div class="row">
+          <button class="col-md-12" onclick="handleMouseDown()">Click</button>
+        </div><br>
+        <div class="row">
+          <button class="col-sm-4" style="padding: 0px;"></button>
+          <button class="col-sm-4" onclick="mouseMoveBtn(0)">UP</button>
+          <button class="col-md-4" style="padding: 0px;"></button>
+        </div>
+        <div class="row">
+          <button class="col-sm-4" onclick="mouseMoveBtn(2)">Left</button>
+          <button class="col-sm-4" onclick="mouseMoveBtn(1)">DOWN</button>
+          <button class="col-sm-4" onclick="mouseMoveBtn(3)">Right</button>
+        </div>
+      </div>
+    </div>
+
+    	<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+      <script type="text/javascript">
+        
+        function handleMouseDown(){
+              $.post("/mouseClick");
+        }
+
+        function mouseMoveBtn (key) {
+          // 0,1,2,3 -> up,down,left right
+          $.post("/mouseMoveBtn",{dir:key});
+        }
+
+        $(function(){
+
+            var canvas=document.getElementById("mousePos");
+            var ctx=canvas.getContext("2d");
+
+            var canvasOffset=$("#mousePos").offset();
+            var offsetX=canvasOffset.left;
+            var offsetY=canvasOffset.top;
+            
+            function handleMouseDown(){
+              $.post("/mouseClick");
+            }
+
+            function handleMouseUp(e){
+              mouseX=parseInt(e.clientX-offsetX);
+              mouseY=parseInt(e.clientY-offsetY);
+              console.log("Up: "+ mouseX + " / " + mouseY);
+            }
+
+            function handleMouseOut(e){
+              mouseX=parseInt(e.clientX-offsetX);
+              mouseY=parseInt(e.clientY-offsetY);
+              console.log("Out: "+ mouseX + " / " + mouseY);
+            }
+
+            function handleMouseMove(e){
+              data={
+                mouseX:parseInt(e.clientX-offsetX),
+                mouseY:parseInt(e.clientY-offsetY)                
+              };
+              
+              $.post("/mouseMove",data);
+              console.log("Move: "+ data.mouseX + " / " + data.mouseY);
+            }
+
+            function handleTouchMove(e){
+              data={
+                mouseX:parseInt(e.targetTouches[0].clientX),
+                mouseY:parseInt(e.targetTouches[0].clientY)                
+              };
+              
+              $.post("/mouseMove",data);
+              console.log("Move: "+ data.mouseX + " / " + data.mouseY);
+            }
+
+
+            //$("#mousePos").mousemove(function(e){handleMouseMove(e);});
+            canvas.addEventListener("touchmove", handleTouchMove, false);
+            /*mc.on("press", function(ev) {
+              console.log(ev.type +" gesture detected.");
+              $.post("/mouseMove",{mouseX:ev.deltaX,mouseY:ev.deltaY});
+            });*/
+            
+        });
+      </script>
+    </body>	
+
+</html>
